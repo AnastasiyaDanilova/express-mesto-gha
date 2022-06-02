@@ -20,9 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/cards', require('./routes/user'));
+app.use('/users', require('./routes/user'));
 
-app.use('/users', require('./routes/card'));
+app.use('/cards', require('./routes/card'));
 
 app.use((req, res) => res.status(404).send({ message: 'Запрашиваемой страницы не существует' }));
 
