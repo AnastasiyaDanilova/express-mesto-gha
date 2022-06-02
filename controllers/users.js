@@ -60,7 +60,8 @@ function updateProfile(req, res) {
         return res.status(404)
           .send({ message: 'Запрашиваемый пользователь не найден' });
       }
-      return res.send({ data: userData });
+      return res.status(200)
+        .send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -93,7 +94,7 @@ function updateAvatar(req, res) {
         return res.status(404)
           .send({ message: 'Запрашиваемый пользователь не найден' });
       }
-      return res.send({ data: userData });
+      return res.status(200).send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
