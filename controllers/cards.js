@@ -64,8 +64,7 @@ function addLike(req, res) {
         return res.status(404)
           .send({ message: 'Запрашиваемая карточка не найдена' });
       }
-      return res.status(200)
-        .send({ data: cardData });
+      return res.send({ data: cardData });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -88,8 +87,7 @@ function deleteLike(req, res) {
         return res.status(404)
           .send({ message: 'Запрашиваемая карточка не найдена' });
       }
-      return res.status(200)
-        .send({ data: cardData });
+      return res.send({ data: cardData });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
