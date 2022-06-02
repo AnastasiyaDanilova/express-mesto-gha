@@ -24,4 +24,9 @@ app.use('/', require('./routes/user'));
 
 app.use('/', require('./routes/card'));
 
+app.use('*', (_, res) => {
+  res.status(404)
+    .send({ message: 'Запрашиваемой страницы не существует' });
+});
+
 app.listen(PORT);
