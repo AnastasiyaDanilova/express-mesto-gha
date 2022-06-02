@@ -61,7 +61,7 @@ function addLike(req, res) {
   )
     .then((cardData) => {
       if (!cardData) {
-        return res.status(400)
+        return res.status(404)
           .send({ message: 'Запрашиваемая карточка не найдена' });
       }
       return res.status(200)
@@ -85,7 +85,7 @@ function deleteLike(req, res) {
   )
     .then((cardData) => {
       if (!cardData) {
-        return res.status(400)
+        return res.status(404)
           .send({ message: 'Запрашиваемая карточка не найдена' });
       }
       return res.status(200)
