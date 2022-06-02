@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 
-function getCard(_, res) {
+function getCard(req, res) {
   Card.find({})
     .then((cards) => {
       res.send({ data: cards });

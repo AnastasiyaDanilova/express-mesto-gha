@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, __, next) => {
+app.use((req, res, next) => {
   req.user = {
     _id: '62987ff1da6b1aba875b2dce',
   };
@@ -20,13 +20,10 @@ app.use((req, __, next) => {
   next();
 });
 
-app.use('/', require('./routes/user'));
+app.use('/cards', require('./routes/user'));
 
-app.use('/', require('./routes/card'));
+app.use('/users', require('./routes/card'));
 
-app.use('*', (_, res) => {
-  res.status(404)
-    .send({ message: 'Запрашиваемой страницы не существует' });
-});
+app.use((req, res) => res.status(404).send({ message: 'Запрашиваемой страницы не существует' }));
 
 app.listen(PORT);

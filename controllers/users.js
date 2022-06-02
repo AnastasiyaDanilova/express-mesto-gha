@@ -1,6 +1,6 @@
 const User = require('../models/user');
 
-function getUsers(_, res) {
+function getUsers(req, res) {
   User.find({})
     .then((users) => res.send({ data: users }))
     .catch((err) => res.status(500).send({ message: `Произошла ошибка сервера: ${err.name}` }));
@@ -69,6 +69,10 @@ function updateProfile(req, res) {
         return res.status(400)
           .send({ message: `Некорректные данные пользователя: ${errObject}` });
       }
+      if (err.name === 'CastError') {
+        return res.status(400)
+          .send({ message: 'Некорректный id пользователя' });
+      }
       return res.status(500)
         .send({ message: `Произошла ошибка сервера: ${err.name}` });
     });
@@ -96,6 +100,10 @@ function updateAvatar(req, res) {
       if (err.name === 'ValidationError') {
         return res.status(400)
           .send({ message: 'Некорректная ссылка' });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400)
+          .send({ message: 'Некорректный id пользователя' });
       }
       return res.status(500)
         .send({ message: `Произошла ошибка сервера: ${err.name}` });
