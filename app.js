@@ -1,6 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const auth = require('./middlewares/auth');
+
+const { login, createUser } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 
@@ -12,17 +16,13 @@ app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '62987ff1da6b1aba875b2dce',
-  };
+app.post('/signin', login);
 
-  next();
-});
+app.post('/signup', createUser);
 
-app.use('/users', require('./routes/user'));
+app.use('/users', auth, require('./routes/user'));
 
-app.use('/cards', require('./routes/card'));
+app.use('/cards', auth, require('./routes/card'));
 
 app.use((req, res) => res.status(404).send({ message: 'Запрашиваемой страницы не существует' }));
 
