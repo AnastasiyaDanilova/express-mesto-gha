@@ -58,6 +58,7 @@ function deleteCard(req, res, next) {
 
 // Добавление лайка
 function addLike(req, res, next) {
+  console.log(req.params)
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
