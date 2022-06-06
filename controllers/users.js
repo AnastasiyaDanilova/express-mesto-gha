@@ -12,11 +12,7 @@ function getUsers(req, res) {
 function getUserInfo(req, res) {
   User.findById(req.user._id)
     .then((userData) => {
-      if (!userData) {
-        return res.status(404)
-          .send({ message: 'Запрашиваемый пользователь не найден' });
-      }
-      return res.send({ data: userData });
+      res.send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'CastError') {

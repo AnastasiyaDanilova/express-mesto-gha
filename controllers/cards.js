@@ -38,11 +38,14 @@ function deleteCard(req, res) {
         return res.status(404)
           .send({ message: 'Запрашиваемая карточка не найдена' });
       }
-      return card.remove()
-        .then((cardData) => {
-          res.status(200)
-            .send({ data: cardData });
-        });
+      if (req.user._id === card.owner.toString()) {
+        return card.remove()
+          .then((cardData) => {
+            res.status(200)
+              .send({ data: cardData });
+          });
+      }
+      return res.status(403).send({ message: 'Нет доступа к удалению чужой карточки' });
     }).catch((err) => {
       if (err.name === 'CastError') {
         return res.status(400)

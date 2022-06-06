@@ -9,11 +9,11 @@ const {
   getUserInfo,
 } = require('../controllers/users');
 
+router.get('/me', getUserInfo);
+
 router.get('/', getUsers);
 
 router.get('/:id', getUserById);
-
-router.get('/me', getUserInfo);
 
 router.patch('/me', celebrate({
   body: Joi.object().keys({
