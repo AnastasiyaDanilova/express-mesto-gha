@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { login, createUser } = require('./controllers/users');
 
@@ -38,8 +39,22 @@ app.use('/users', auth, require('./routes/user'));
 
 app.use('/cards', auth, require('./routes/card'));
 
+app.use((req, res, next) => {
+  next(new NotFoundError('Запрашиваемой страницы не существует'));
+});
+
 app.use(errors());
 
-app.use((req, res) => res.status(404).send({ message: 'Запрашиваемой страницы не существует' }));
+app.use('*', auth, (err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
+});
 
 app.listen(PORT);

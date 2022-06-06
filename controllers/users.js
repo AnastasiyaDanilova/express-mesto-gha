@@ -2,6 +2,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFoundError = require('../errors/NotFoundError');
 
 function getUsers(req, res) {
   User.find({})
@@ -24,12 +25,11 @@ function getUserInfo(req, res) {
     });
 }
 
-function getUserById(req, res) {
+function getUserById(req, res, next) {
   User.findById(req.params.id)
     .then((userData) => {
       if (!userData) {
-        return res.status(404)
-          .send({ message: 'Запрашиваемый пользователь не найден' });
+        throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
       return res.send({ data: userData });
     })
@@ -38,8 +38,7 @@ function getUserById(req, res) {
         return res.status(400)
           .send({ message: 'Некорректный id пользователя' });
       }
-      return res.status(500)
-        .send({ message: `Произошла ошибка сервера: ${err.name}` });
+      return next(err);
     });
 }
 
@@ -61,9 +60,17 @@ function createUser(req, res) {
         email,
         password: hash,
       })
-        .then((userData) => {
+        .then((user) => {
           res.status(201)
-            .send({ data: userData });
+            .send({
+              data: {
+                name: user.name,
+                about: user.about,
+                avatar: user.avatar,
+                email: user.email,
+                _id: user._id,
+              },
+            });
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
@@ -80,7 +87,7 @@ function createUser(req, res) {
     });
 }
 
-function updateProfile(req, res) {
+function updateProfile(req, res, next) {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -93,28 +100,26 @@ function updateProfile(req, res) {
   )
     .then((userData) => {
       if (!userData) {
-        return res.status(404)
-          .send({ message: 'Запрашиваемый пользователь не найден' });
+        throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
-      return res.status(200)
+      res.status(200)
         .send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const errObject = Object.keys(err.errors).join(', ');
-        return res.status(400)
+        res.status(400)
           .send({ message: `Некорректные данные пользователя: ${errObject}` });
       }
       if (err.name === 'CastError') {
-        return res.status(400)
+        res.status(400)
           .send({ message: 'Некорректный id пользователя' });
       }
-      return res.status(500)
-        .send({ message: `Произошла ошибка сервера: ${err.name}` });
+      return next(err);
     });
 }
 
-function updateAvatar(req, res) {
+function updateAvatar(req, res, next) {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -127,22 +132,20 @@ function updateAvatar(req, res) {
   )
     .then((userData) => {
       if (!userData) {
-        return res.status(404)
-          .send({ message: 'Запрашиваемый пользователь не найден' });
+        throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
-      return res.status(200).send({ data: userData });
+      res.status(200).send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400)
+        res.status(400)
           .send({ message: 'Некорректная ссылка' });
       }
       if (err.name === 'CastError') {
-        return res.status(400)
+        res.status(400)
           .send({ message: 'Некорректный id пользователя' });
       }
-      return res.status(500)
-        .send({ message: `Произошла ошибка сервера: ${err.name}` });
+      return next(err);
     });
 }
 
