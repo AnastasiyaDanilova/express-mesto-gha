@@ -75,6 +75,9 @@ function createUser(req, res) {
             return res.status(400)
               .send({ message: `Некорректные данные пользователя: ${errObject}` });
           }
+          if (err.code === 11000) {
+            return res.status(409).send({ message: 'Такой email уже занят' });
+          }
           return res.status(500)
             .send({ message: `Произошла ошибка сервера: ${err.name}` });
         });

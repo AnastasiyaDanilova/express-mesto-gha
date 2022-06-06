@@ -15,7 +15,12 @@ router.get('/:id', getUserById);
 
 router.get('/me', getUserInfo);
 
-router.patch('/me', updateProfile);
+router.patch('/me', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), updateProfile);
 
 router.patch('/me/avatar', updateAvatar);
 

@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, errors } = require('celebrate');
 const auth = require('./middlewares/auth');
 
 const { login, createUser } = require('./controllers/users');
@@ -37,6 +37,8 @@ app.post('/signup', celebrate({
 app.use('/users', auth, require('./routes/user'));
 
 app.use('/cards', auth, require('./routes/card'));
+
+app.use(errors());
 
 app.use((req, res) => res.status(404).send({ message: 'Запрашиваемой страницы не существует' }));
 
