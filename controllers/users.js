@@ -3,25 +3,27 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
-function getUsers(req, res) {
+function getUsers(req, res, next) {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка сервера: ${err.name}` }));
+    .catch(next);
 }
 
-function getUserInfo(req, res) {
+function getUserInfo(req, res, next) {
   User.findById(req.user._id)
     .then((userData) => {
       res.send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400)
-          .send({ message: 'Некорректный id пользователя' });
+        next(new BadRequestError('Некорректный id карточки'));
+        return;
       }
-      return res.status(500)
-        .send({ message: `Произошла ошибка сервера: ${err.name}` });
+      next(err);
     });
 }
 
@@ -35,14 +37,14 @@ function getUserById(req, res, next) {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400)
-          .send({ message: 'Некорректный id пользователя' });
+        next(new BadRequestError('Некорректный id карточки'));
+        return;
       }
-      return next(err);
+      next(err);
     });
 }
 
-function createUser(req, res) {
+function createUser(req, res, next) {
   const {
     name,
     about,
@@ -61,30 +63,29 @@ function createUser(req, res) {
         password: hash,
       })
         .then((user) => {
-          res.status(201)
-            .send({
-              data: {
-                name: user.name,
-                about: user.about,
-                avatar: user.avatar,
-                email: user.email,
-                _id: user._id,
-              },
-            });
+          res.send({
+            data: {
+              name: user.name,
+              about: user.about,
+              avatar: user.avatar,
+              email: user.email,
+              _id: user._id,
+            },
+          });
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
             const errObject = Object.keys(err.errors).join(', ');
-            return res.status(400)
-              .send({ message: `Некорректные данные пользователя: ${errObject}` });
+            next(new BadRequestError(`Некорректные данные: ${errObject}`));
+            return;
           }
           if (err.code === 11000) {
-            return res.status(409).send({ message: 'Такой email уже занят' });
+            next(new ConflictError('Такой email уже занят'));
+            return;
           }
-          return res.status(500)
-            .send({ message: `Произошла ошибка сервера: ${err.name}` });
+          next(err);
         });
-    });
+    }).catch(next);
 }
 
 function updateProfile(req, res, next) {
@@ -102,20 +103,19 @@ function updateProfile(req, res, next) {
       if (!userData) {
         throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
-      res.status(200)
-        .send({ data: userData });
+      res.send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         const errObject = Object.keys(err.errors).join(', ');
-        res.status(400)
-          .send({ message: `Некорректные данные пользователя: ${errObject}` });
+        next(new BadRequestError(`Некорректные данные: ${errObject}`));
+        return;
       }
       if (err.name === 'CastError') {
-        res.status(400)
-          .send({ message: 'Некорректный id пользователя' });
+        next(new BadRequestError('Некорректный id пользователя'));
+        return;
       }
-      return next(err);
+      next(err);
     });
 }
 
@@ -134,25 +134,25 @@ function updateAvatar(req, res, next) {
       if (!userData) {
         throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
-      res.status(200).send({ data: userData });
+      res.send({ data: userData });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400)
-          .send({ message: 'Некорректная ссылка' });
+        next(new BadRequestError('Некорректная ссылка'));
+        return;
       }
       if (err.name === 'CastError') {
-        res.status(400)
-          .send({ message: 'Некорректный id пользователя' });
+        next(new BadRequestError('Некорректный id пользователя'));
+        return;
       }
-      return next(err);
+      next(err);
     });
 }
 
-function login(req, res) {
+function login(req, res, next) {
   const { email, password } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
@@ -166,9 +166,11 @@ function login(req, res) {
         .end();
     })
     .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
+      if (err.name === 'Error') {
+        next(new UnauthorizedError('Некорректные данные почты или пароля'));
+        return;
+      }
+      next(err);
     });
 }
 

@@ -19,8 +19,7 @@ function createCard(req, res, next) {
 
   Card.create({ name, link, owner: _id })
     .then((cardData) => {
-      res.status(201)
-        .send({ data: cardData });
+      res.send({ data: cardData });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -68,8 +67,7 @@ function addLike(req, res, next) {
         next(new NotFoundError('Запрашиваемая карточка не найдена'));
         return;
       }
-      res.status(200)
-        .send({ data: cardData });
+      res.send({ data: cardData });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -92,8 +90,7 @@ function deleteLike(req, res, next) {
         next(new NotFoundError('Запрашиваемая карточка не найдена'));
         return;
       }
-      res.status(200)
-        .send({ data: cardData });
+      res.send({ data: cardData });
     })
     .catch((err) => {
       if (err.name === 'CastError') {

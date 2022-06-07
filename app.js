@@ -39,13 +39,13 @@ app.use('/users', auth, require('./routes/user'));
 
 app.use('/cards', auth, require('./routes/card'));
 
-app.use((req, res, next) => {
+app.use(auth, (req, res, next) => {
   next(new NotFoundError('Запрашиваемой страницы не существует'));
 });
 
 app.use(errors());
 
-app.use('*', auth, (err, req, res, next) => {
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
     .status(statusCode)
