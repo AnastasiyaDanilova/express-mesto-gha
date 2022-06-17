@@ -9,14 +9,14 @@ const UnauthorizedError = require('../errors/UnauthorizedError');
 
 function getUsers(req, res, next) {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res.send(users))
     .catch(next);
 }
 
 function getUserInfo(req, res, next) {
   User.findById(req.user._id)
     .then((userData) => {
-      res.send({ data: userData });
+      res.send(userData);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -33,7 +33,7 @@ function getUserById(req, res, next) {
       if (!userData) {
         throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
-      return res.send({ data: userData });
+      return res.send(userData);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -64,13 +64,11 @@ function createUser(req, res, next) {
       })
         .then((user) => {
           res.send({
-            data: {
-              name: user.name,
-              about: user.about,
-              avatar: user.avatar,
-              email: user.email,
-              _id: user._id,
-            },
+            name,
+            about,
+            avatar,
+            email,
+            _id: user._id,
           });
         })
         .catch((err) => {
@@ -103,7 +101,7 @@ function updateProfile(req, res, next) {
       if (!userData) {
         throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
-      res.send({ data: userData });
+      res.send(userData);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -134,7 +132,7 @@ function updateAvatar(req, res, next) {
       if (!userData) {
         throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
-      res.send({ data: userData });
+      res.send(userData);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -159,10 +157,7 @@ function login(req, res, next) {
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
-      res.cookie('jwt', token, {
-        maxAge: 3600000 * 24 * 7,
-        httpOnly: true,
-      }).send({ data: token })
+      res.send({ token })
         .end();
     })
     .catch((err) => {

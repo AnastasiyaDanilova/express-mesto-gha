@@ -7,7 +7,7 @@ const ForbiddenError = require('../errors/ForbiddenError');
 function getCard(req, res, next) {
   Card.find({})
     .then((cards) => {
-      res.send({ data: cards });
+      res.send(cards);
     })
     .catch((err) => next(err));
 }
@@ -19,7 +19,7 @@ function createCard(req, res, next) {
 
   Card.create({ name, link, owner: _id })
     .then((cardData) => {
-      res.send({ data: cardData });
+      res.send(cardData);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -42,7 +42,7 @@ function deleteCard(req, res, next) {
       if (req.user._id === card.owner.toString()) {
         return card.remove()
           .then(() => {
-            res.send({ data: card });
+            res.send(card);
           });
       }
       throw new ForbiddenError('Нет доступа к удалению чужой карточки');
@@ -67,7 +67,7 @@ function addLike(req, res, next) {
         next(new NotFoundError('Запрашиваемая карточка не найдена'));
         return;
       }
-      res.send({ data: cardData });
+      res.send(cardData);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -90,7 +90,7 @@ function deleteLike(req, res, next) {
         next(new NotFoundError('Запрашиваемая карточка не найдена'));
         return;
       }
-      res.send({ data: cardData });
+      res.send(cardData);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
